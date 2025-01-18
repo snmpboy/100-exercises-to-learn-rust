@@ -3,17 +3,48 @@
 //  The docs for the `std::fmt` module are a good place to start and look for examples:
 //  https://doc.rust-lang.org/std/fmt/index.html#write
 
+use std::any::Any;
+use std::fmt;
+use std::fmt::Display;
+use crate::TicketNewError::{EmptyTitleError, TitleTooLongError};
+
+#[derive(Debug)]
 enum TicketNewError {
-    TitleError(String),
+    EmptyTitleError,
+    TitleTooLongError,
     DescriptionError(String),
 }
+impl Display for TicketNewError  {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error>
+    {
+        match &self {
+            EmptyTitleError => write!(f, "{}", "Title cannot be empty"),
+            TitleTooLongError => write!(f, "{}", "Title cannot be longer than 50 bytes"),
+            _ => Ok(())
+        };
+        Ok(())
+    }
+}
+impl std::error::Error for TicketNewError {}
 
 // TODO: `easy_ticket` should panic when the title is invalid, using the error message
 //   stored inside the relevant variant of the `TicketNewError` enum.
 //   When the description is invalid, instead, it should use a default description:
 //   "Description not provided".
-fn easy_ticket(title: String, description: String, status: Status) -> Ticket {
-    todo!()
+fn easy_ticket(title: String, description: String, status: Status) -> Ticket
+{
+    match Ticket::new(title.clone(), description, status.clone()) {
+        Ok(ticket) => ticket,
+        Err(TicketNewError::DescriptionError(_))  => {
+            Ticket::new(title,
+                        "Description not provided".to_string(),
+                        status).unwrap()
+        },
+        Err(TitleError) =>{
+            panic!("{}", TitleError)
+        }
+
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -37,14 +68,10 @@ impl Ticket {
         status: Status,
     ) -> Result<Ticket, TicketNewError> {
         if title.is_empty() {
-            return Err(TicketNewError::TitleError(
-                "Title cannot be empty".to_string(),
-            ));
+            return Err(TicketNewError::EmptyTitleError);
         }
         if title.len() > 50 {
-            return Err(TicketNewError::TitleError(
-                "Title cannot be longer than 50 bytes".to_string(),
-            ));
+            return Err(TicketNewError::TitleTooLongError);
         }
         if description.is_empty() {
             return Err(TicketNewError::DescriptionError(

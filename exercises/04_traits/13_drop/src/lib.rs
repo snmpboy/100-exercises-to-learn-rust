@@ -2,6 +2,28 @@
 //  unless a certain operation has been performed on it.
 //  You can see the expected API in the tests below.
 
+use std::mem;
+use std::ptr::drop_in_place;
+
+struct DropBomb;
+
+impl DropBomb {
+    fn new() -> Self
+    {
+        DropBomb {}
+    }
+    fn defuse(self) {
+        mem::forget(self)
+    }
+
+}
+
+impl Drop for DropBomb {
+    fn drop(&mut self) {
+        panic!("DropBomb dropped!!")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

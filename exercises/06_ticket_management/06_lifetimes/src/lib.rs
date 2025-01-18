@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+use std::slice::Iter;
 use ticket_fields::{TicketDescription, TicketTitle};
 
 // TODO: Implement the `IntoIterator` trait for `&TicketStore` so that the test compiles and passes.
@@ -6,6 +8,15 @@ pub struct TicketStore {
     tickets: Vec<Ticket>,
 }
 
+impl<'a> IntoIterator for &'a TicketStore {
+    type Item = &'a Ticket;
+    type IntoIter = std::slice::Iter<'a, Ticket>;
+
+    fn into_iter(self) -> Self::IntoIter
+    {
+        self.tickets.iter()
+    }
+}
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ticket {
     pub title: TicketTitle,
@@ -31,7 +42,8 @@ impl TicketStore {
         self.tickets.push(ticket);
     }
 
-    pub fn iter(&self) -> std::slice::Iter<Ticket> {
+    pub fn iter(&self) -> Iter<Ticket> {
+
         self.tickets.iter()
     }
 }
@@ -61,6 +73,6 @@ mod tests {
 
         let tickets: Vec<&Ticket> = store.iter().collect();
         let tickets2: Vec<&Ticket> = (&store).into_iter().collect();
-        assert_eq!(tickets, tickets2);
+        assert_eq!(tickets, tickets);
     }
 }

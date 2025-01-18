@@ -1,3 +1,4 @@
+use std::ops::Deref;
 // TODO: Implement the `to_dos` method. It must return a `Vec` of references to the tickets
 //  in `TicketStore` with status set to `Status::ToDo`.
 use ticket_fields::{TicketDescription, TicketTitle};
@@ -6,6 +7,23 @@ use ticket_fields::{TicketDescription, TicketTitle};
 pub struct TicketStore {
     tickets: Vec<Ticket>,
 }
+
+impl Iterator for TicketStore {
+    type Item = Vec<Ticket>;
+
+    fn next(&mut self) -> Option<Vec<Ticket>> {
+        Some(self.tickets.clone())
+    }
+}
+/*
+impl Deref for TicketStore {
+    type Target = Vec<Ticket>;
+    fn deref(&self) -> &Self::Target
+    {
+        &self.tickets
+    }
+}
+*/
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ticket {
@@ -31,6 +49,13 @@ impl TicketStore {
     pub fn add_ticket(&mut self, ticket: Ticket) {
         self.tickets.push(ticket);
     }
+
+    pub fn to_dos(&mut self) -> Vec<&Ticket>
+    {
+        self.tickets.iter().filter(|t|
+             t.status == Status::ToDo ).collect()
+    }
+
 }
 
 #[cfg(test)]

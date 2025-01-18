@@ -1,9 +1,18 @@
+use std::ops::{Deref, Index};
 use ticket_fields::{TicketDescription, TicketTitle};
 
 // TODO: Provide an `iter` method that returns an iterator over `&Ticket` items.
 #[derive(Clone)]
 pub struct TicketStore {
     tickets: Vec<Ticket>,
+}
+
+impl Deref for TicketStore {
+    type Target = Vec<Ticket>;
+    fn deref(&self) -> &Self::Target
+    {
+       &self.tickets
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -28,6 +37,7 @@ impl TicketStore {
     }
 
     pub fn add_ticket(&mut self, ticket: Ticket) {
+
         self.tickets.push(ticket);
     }
 }
