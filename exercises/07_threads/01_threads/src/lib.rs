@@ -3,6 +3,7 @@
 //  Given a vector of integers, split the vector into two halves and
 //  sum each half in a separate thread.
 
+use std::sync::{Arc, RwLock};
 // Caveat: We can't test *how* the function is implemented,
 // we can only verify that it produces the correct result.
 // You _could_ pass this test by just returning `v.iter().sum()`,
@@ -14,8 +15,32 @@
 // this is necessary in the next exercise.
 use std::thread;
 
-pub fn sum(v: Vec<i32>) -> i32 {
-    todo!()
+pub fn sum( v: Vec<i32>) -> i32
+{
+   if v.is_empty() {return 0;}
+    let data = Arc::new(RwLock::new(0));
+
+    let mut vec1 = vec![];
+    let mut vec2 = vec![];
+   let tuples = v.split_at(v.len()/2);
+    for i in tuples.0 {
+        vec1.push(*i)
+    }
+    for j in tuples.1 {
+        vec2.push(*j)
+    }
+    let vec_of_vecs = vec![vec1, vec2];
+    for v in vec_of_vecs {
+        let data_clone = data.clone();
+        thread::spawn(move || {
+            for i in v {
+                let mut total = data_clone.write().unwrap();
+                *total += i;
+            }
+        }).join().unwrap();
+    }
+    let sum = data.read().unwrap();
+    *sum
 }
 
 #[cfg(test)]

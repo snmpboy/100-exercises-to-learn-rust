@@ -5,8 +5,14 @@
 
 use std::thread;
 
-pub fn sum(v: Vec<i32>) -> i32 {
-    todo!()
+pub fn sum(v: Vec<i32>) -> i32
+{
+    let static_ref: &'static mut [i32] = v.leak();
+    let (first, last) = static_ref.split_at_mut(static_ref.len()/2);
+    let handle1 = thread::spawn(|| first.iter().sum::<i32>());
+    let handle2 = thread::spawn(|| last.iter().sum::<i32>());
+
+   handle1.join().unwrap() + handle2.join().unwrap()
 }
 
 #[cfg(test)]

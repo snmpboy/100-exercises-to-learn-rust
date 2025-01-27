@@ -1,10 +1,28 @@
+use std::fmt::Debug;
+use std::sync::{Arc, RwLock};
 // TODO: Given a static slice of integers, split the slice into two halves and
 //  sum each half in a separate thread.
 //  Do not allocate any additional memory!
 use std::thread;
 
-pub fn sum(slice: &'static [i32]) -> i32 {
-    todo!()
+
+pub fn sum(slice: &'static [i32]) -> i32
+{
+
+    let data = Arc::new(RwLock::new(0));
+    let tup = slice.split_at(slice.len()/2);
+    let array_2d = [tup.0, tup.1];
+    for a in array_2d {
+        let data_clone = data.clone();
+        thread::spawn(move|| {
+            for i in a {
+                let mut total = data_clone.write().unwrap();
+                *total += i;
+            }
+        }).join().unwrap();
+    }
+    let sum = data.read().unwrap();
+    *sum
 }
 
 #[cfg(test)]

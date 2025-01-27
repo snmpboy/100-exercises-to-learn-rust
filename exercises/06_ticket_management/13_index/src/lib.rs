@@ -1,11 +1,32 @@
+
 // TODO: Implement `Index<&TicketId>` and `Index<TicketId>` for `TicketStore`.
 
+use std::ops::Index;
 use ticket_fields::{TicketDescription, TicketTitle};
 
 #[derive(Clone)]
 pub struct TicketStore {
     tickets: Vec<Ticket>,
     counter: u64,
+}
+
+impl Index<TicketId> for TicketStore {
+    type Output = Ticket;
+
+    fn index(&self, index: TicketId) -> &Self::Output {
+        match index {
+            index => self.tickets.get(index).unwrap()
+        }
+    }
+}
+
+impl Index<&TicketId> for TicketStore {
+    type Output = Ticket;
+    fn index(&self, index: &TicketId) -> &Self::Output {
+        match index {
+            index => self.tickets.get(index.0 as usize).unwrap()
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -53,7 +74,8 @@ impl TicketStore {
         id
     }
 
-    pub fn get(&self, id: TicketId) -> Option<&Ticket> {
+    pub fn get(&self, id: TicketId) -> Option<&Ticket>
+    {
         self.tickets.iter().find(|&t| t.id == id)
     }
 }
@@ -76,7 +98,6 @@ mod tests {
         assert_eq!(draft1.title, ticket1.title);
         assert_eq!(draft1.description, ticket1.description);
         assert_eq!(ticket1.status, Status::ToDo);
-
         let draft2 = TicketDraft {
             title: ticket_title(),
             description: ticket_description(),
